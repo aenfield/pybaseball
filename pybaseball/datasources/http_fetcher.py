@@ -14,9 +14,10 @@ def fetch_url(url: str, params: Optional[dict] = None) -> bytes:
 
 def _fetch_via_scrape_do(url: str, params: Optional[dict], api_key: str) -> bytes:
     full_url = f"{url}?{urlencode(params)}" if params else url
-    response = cffi_requests.get(
-        "https://api.scrape.do",
-        params={"token": api_key, "url": full_url, "render": "true"},
+    # Use POST to avoid URL-length limits when the target URL has many query params
+    response = cffi_requests.post(
+        f"https://api.scrape.do?token={api_key}&render=true",
+        data={"url": full_url},
         timeout=60,
     )
     if response.status_code > 399:
