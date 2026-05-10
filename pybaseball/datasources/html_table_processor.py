@@ -3,10 +3,10 @@ from typing import Any, Callable, Dict, List, Optional, Union
 
 import lxml.etree
 import pandas as pd
-import requests
 
 from ..datahelpers import postprocessing
 from ..datahelpers.column_mapper import ColumnListMapperFunction
+from .http_fetcher import fetch_url
 
 RowIdFunction = Optional[Callable[[Any, lxml.etree.Element], Optional[Union[int, str]]]]
 
@@ -68,15 +68,10 @@ class HTMLTableProcessor:
                                   column_name_mapper: ColumnListMapperFunction = None,
                                   known_percentages: Optional[List[str]] = None, row_id_func: RowIdFunction = None,
                                       row_id_name: Optional[str] = None) -> pd.DataFrame:
-        response = requests.get(self.root_url + url, params=query_params)
-
-        if response.status_code > 399:
-            raise requests.exceptions.HTTPError(
-                f"Error accessing '{self.root_url + url}'. Received status code {response.status_code}"
-            )
+        content = fetch_url(self.root_url + url, query_params)
 
         return self.get_tabular_data_from_html(
-            response.content,
+            content,
             column_name_mapper=column_name_mapper,
             known_percentages=known_percentages,
             row_id_func=row_id_func,
