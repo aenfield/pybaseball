@@ -17,7 +17,7 @@ def _fetch_via_scrape_do(url: str, params: Optional[dict], api_key: str) -> byte
     response = cffi_requests.get(
         "https://api.scrape.do",
         params={"token": api_key, "url": full_url, "render": "true"},
-        timeout=30,
+        timeout=60,
     )
     if response.status_code > 399:
         raise cffi_requests.exceptions.HTTPError(
