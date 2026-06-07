@@ -42,14 +42,15 @@ def _fetch_via_scrape_do(url: str, params: Optional[dict], api_key: str) -> byte
     backoff_enabled = _get_backoff_enabled()
 
     for attempt in range(max_retries):
-        logger.info(f"scrape.do attempt {attempt + 1}/{max_retries} for '{full_url}'")
+        logger.debug(f"scrape.do attempt {attempt + 1}/{max_retries} for '{full_url}'")
         response = cffi_requests.get(
             "https://api.scrape.do",
             params={"token": api_key, "url": full_url, "render": "true"},
             timeout=90,
         )
         if response.status_code == 200:
-            logger.info(f"scrape.do succeeded on attempt {attempt + 1}/{max_retries}")
+            if attempt > 0:
+                logger.warning(f"scrape.do succeeded on attempt {attempt + 1}/{max_retries}")
             return response.content
         if response.status_code == 502:
             # Transient proxy error from scrape.do — does not consume a credit
