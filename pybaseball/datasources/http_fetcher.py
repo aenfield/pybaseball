@@ -36,6 +36,13 @@ def _get_backoff_enabled() -> bool:
     return _DEFAULT_BACKOFF_ENABLED
 
 
+def get_scrape_do_config() -> dict:
+    return {
+        "max_retries": _get_max_retries(),
+        "backoff_enabled": _get_backoff_enabled(),
+    }
+
+
 def _fetch_via_scrape_do(url: str, params: Optional[dict], api_key: str) -> bytes:
     full_url = f"{url}?{urlencode(params)}" if params else url
     max_retries = _get_max_retries()
