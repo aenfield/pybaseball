@@ -8,8 +8,9 @@ from curl_cffi import requests as cffi_requests
 
 logger = logging.getLogger(__name__)
 
-_DEFAULT_MAX_RETRIES = 7
+_DEFAULT_MAX_RETRIES = 15
 _DEFAULT_BACKOFF_ENABLED = True
+_MAX_BACKOFF_SECONDS = 120
 
 
 def fetch_url(url: str, params: Optional[dict] = None) -> bytes:
@@ -62,7 +63,7 @@ def _fetch_via_scrape_do(url: str, params: Optional[dict], api_key: str) -> byte
         if response.status_code == 502:
             # Transient proxy error from scrape.do — does not consume a credit
             if attempt < max_retries - 1:
-                wait = 2**attempt if backoff_enabled else 0
+                wait = min(2**attempt, _MAX_BACKOFF_SECONDS) if backoff_enabled else 0
                 if wait > 0:
                     logger.warning(
                         f"scrape.do returned 502 on attempt {attempt + 1}/{max_retries}"
